@@ -30,7 +30,7 @@ var clientTransport = new StdioClientTransport(new()
 {
     Name = "Demo Server",
     Command = "dotnet",
-    Arguments = ["run", "--project", "../McpCalculatorServer/McpCalculatorServer.csproj"],
+    Arguments = ["run", "--project", "../Server/Server.csproj"],
 });
 
 //var clientTransport = new StdioClientTransport(new()
