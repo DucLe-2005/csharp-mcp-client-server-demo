@@ -21,8 +21,8 @@ This demo helps you understand:
 ```
 mcp-dotnet-demo/
 │
-├── client/        # The MCP client that sends requests and interacts with the LLM
-└── server/        # The MCP server that exposes tools and handles requests
+├── Client/        # The MCP client that sends requests and interacts with the LLM
+└── Server/        # The MCP server that exposes tools and handles requests
 ```
 
 ---
@@ -48,7 +48,7 @@ Make sure you have the following installed:
 
 ### 3️⃣ Build and run the **Server**
 ```bash
-cd server
+cd Server
 dotnet build
 dotnet run
 ```
@@ -61,7 +61,7 @@ It exposes basic MCP tools defined in your C# project.
 ### 4️⃣ Build and run the **Client**
 In another terminal:
 ```bash
-cd client
+cd Client
 dotnet build
 dotnet run
 ```
@@ -75,7 +75,7 @@ You should see structured request/response messages printed in the console.
 You can visualize the client-server interaction using the [MCP Inspector tool](https://www.npmjs.com/package/@modelcontextprotocol/inspector):
 
 ```bash
-npx @modelcontextprotocol/inspector dotnet run --project ./server
+npx @modelcontextprotocol/inspector dotnet run --project ./Server
 ```
 
 ---
@@ -92,15 +92,7 @@ npx @modelcontextprotocol/inspector dotnet run --project ./server
 ## 📚 References
 
 - Microsoft’s official guide: [Model Context Protocol for Beginners](https://github.com/microsoft/mcp-for-beginners)
-- [Model Context Protocol Specification](https://github.com/modelcontextprotocol/specification)
-
----
-
-## 🧑‍💻 Author
-
-**Duc Le** — Computer Science & Mathematics @ TCU  
-Interested in cloud, backend, and infrastructure engineering.  
-> 💬 Feel free to reach out or fork this repo to explore MCP in .NET!
+- [MCP's C# SDK](https://github.com/modelcontextprotocol/csharp-sdk?utm_source=chatgpt.com)
 
 ---
 
