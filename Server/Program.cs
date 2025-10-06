@@ -1,10 +1,13 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using ModelContextProtocol;
+using ModelContextProtocol.Protocol;
 using ModelContextProtocol.Server;
 using System.ComponentModel;
+using System.Security.Cryptography.X509Certificates;
 
-var builder = Host.CreateApplicationBuilder(args);
+var builder = WebApplication.CreateBuilder(args);
 builder.Logging.AddConsole(consoleLogOptions =>
 {
     // Configure all logs to go to stderr
@@ -13,9 +16,43 @@ builder.Logging.AddConsole(consoleLogOptions =>
 
 builder.Services
     .AddMcpServer()
-    .WithStdioServerTransport()
+     //.WithStdioServerTransport()
+    .WithHttpTransport()
     .WithToolsFromAssembly();
-await builder.Build().RunAsync();
+
+builder.WebHost.UseUrls("http://localhost:5178");
+
+var app = builder.Build();
+app.MapMcp();
+app.Run();
+
+
+
+
+[McpServerTool("A tool that sends progress notification")]
+public async Task<TextContent> ProcessFiles(
+    IProgress<ProgressNotificationValue> progress,
+    string message,
+    CancellationToken cancellationToken)
+{
+    progress.Report(new ProgressNotificationValue("Processing file 1/3..."));
+    progress.Report(new ProgressNotificationValue("Processing file 2/3..."));
+    progress.Report(new ProgressNotificationValue("Processing file 3/3..."));
+
+    var result = new CallToolResult
+    {
+        Content = new[]
+        {
+            new TextContentBlock
+            {
+                Type = "text",
+                Text = $"Done: {message}"
+            }
+        }
+    };
+
+    return Task.FromResult(result);
+}
 
 [McpServerToolType]
 public static class McpCalculatorServer
