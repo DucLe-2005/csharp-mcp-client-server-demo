@@ -92,7 +92,7 @@ npx @modelcontextprotocol/inspector dotnet run --project ./server
 ## 📚 References
 
 - Microsoft’s official guide: [Model Context Protocol for Beginners](https://github.com/microsoft/mcp-for-beginners)
-- [Model Context Protocol Specification](https://github.com/modelcontextprotocol/specification)
+- [MCP's C# SDK](https://github.com/modelcontextprotocol/csharp-sdk?utm_source=chatgpt.com)
 
 ---
 
