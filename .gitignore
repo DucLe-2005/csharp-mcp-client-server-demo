@@ -33,8 +33,7 @@
 *.sln.iml
 
 # Visual Studio Code
-.vscode/
-.vs/
+.vs
 
 # NuGet packages
 *.nupkg
