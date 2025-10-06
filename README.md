@@ -96,14 +96,6 @@ npx @modelcontextprotocol/inspector dotnet run --project ./server
 
 ---
 
-## 🧑‍💻 Author
-
-**Duc Le** — Computer Science & Mathematics @ TCU  
-Interested in cloud, backend, and infrastructure engineering.  
-> 💬 Feel free to reach out or fork this repo to explore MCP in .NET!
-
----
-
 ## 🪄 License
 
 This project is provided for educational and demo purposes.  
