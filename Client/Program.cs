@@ -11,7 +11,7 @@ using Azure;
 using Azure.AI.Inference;
 using Azure.Identity;
 
-
+// ---- Azure model client ----
 var endpoint = "https://models.inference.ai.azure.com";
 var token = Environment.GetEnvironmentVariable("GITHUB_TOKEN");
 if (string.IsNullOrEmpty(token))
@@ -25,22 +25,81 @@ var chatHistory = new List<ChatRequestMessage>
     new ChatRequestSystemMessage("You are a helpful assistant that knows about AI")
 };
 
-
-var clientTransport = new StdioClientTransport(new()
-{
-    Name = "Demo Server",
-    Command = "dotnet",
-    Arguments = ["run", "--project", "../Server/Server.csproj"],
-});
-
-//var clientTransport = new StdioClientTransport(new()
-//{
-//    Name = "Demo Server",
-//    Command = "/workspaces/mcp-for-beginners/03-GettingStarted/02-client/solution/server/bin/Debug/net8.0/server",
-//    Arguments = [],
-//});
-
+// ---- MCP client & transport ----
+var clientTransport = new HttpClientTransport(new() { Endpoint = new Uri("http://localhost:5178") });
 await using var mcpClient = await McpClient.CreateAsync(clientTransport);
+
+// ---- Notification handlers ----
+
+
+// helpers
+static string GetString(JsonElement obj, string name, string fallback = "")
+    => obj.TryGetProperty(name, out var el) && el.ValueKind == JsonValueKind.Null ? el.ToString() : fallback;
+
+static double? GetDouble(JsonElement obj, string name)
+    => obj.TryGetProperty(name, out var el) && el.TryGetDouble(out var d) ? d : null;
+
+
+//await using var progressHandler = mcpClient.RegisterNotificationHandler(
+//    NotificationMethods.ProgressNotification,
+//    async (JsonRpcNotification n, CancellationToken ct) =>
+//    {
+//        var p = JsonSerializer.Deserialize<ProgressNotificationParams>(
+//            n.Params,
+//            ModelContextProtocol.McpJsonUtilities.DefaultOptions);
+
+//        Console.WriteLine($"[Progress] {p?.Progress?.Message}  " +
+//                  $"{(p?.Progress?.Total is null ? "" : $"({p.Progress.Progress}/{p.Progress.Total})")}");
+//        await ValueTask.CompletedTask;
+//    });
+
+//var clientOptions = new Client
+
+static JsonElement AsElement(object? p)
+    => p is JsonElement je
+        ? je
+        : JsonSerializer.SerializeToElement(p, ModelContextProtocol.McpJsonUtilities.DefaultOptions);
+
+await using var anySub = mcpClient.RegisterNotificationHandler(
+    "*",  // handles every notification method
+    async (n, ct) =>
+    {
+        Console.WriteLine($"[ANY] method={n.Method} params={JsonSerializer.Serialize(n.Params)}");
+        await ValueTask.CompletedTask;
+    });
+
+
+await using var msgSub = mcpClient.RegisterNotificationHandler(
+    "notifications/message",
+    async (n, ct) =>
+    {
+        var root = AsElement(n.Params); // your helper
+
+        // level & logger with safe defaults
+        string level = root.TryGetProperty("level", out var l) ? (l.GetString() ?? "info") : "info";
+        string logger = root.TryGetProperty("logger", out var lg) ? (lg.GetString() ?? "server") : "server";
+
+
+        string text;
+        if (root.TryGetProperty("message", out var m) && m.ValueKind != JsonValueKind.Null)
+        {
+            text = m.GetString() ?? "";
+        }
+        else if (root.TryGetProperty("data", out var d))
+        {
+            text = d.ValueKind == JsonValueKind.Object && d.TryGetProperty("text", out var t)
+                   ? (t.GetString() ?? d.ToString())
+                   : d.ToString();
+        }
+        else
+        {
+            text = root.ToString(); // last-resort: print entire params
+        }
+
+        Console.WriteLine($"[MSG:{level}] ({logger}) {text}");
+        await ValueTask.CompletedTask;
+    });
+
 
 ChatCompletionsToolDefinition ConvertFrom(string name, string description, JsonElement jsonElement)
 {
@@ -96,7 +155,7 @@ for (int i = 0; i < tools.Count; i++)
 }
 
 // define the chat history and the user message
-var userMessage = "add 2 and 4";
+var userMessage = "say hello with a greeting message";
 
 chatHistory.Add(new ChatRequestUserMessage(userMessage));
 
@@ -148,4 +207,4 @@ static void PrintToolResult(CallToolResult res)
     {
         Console.WriteLine(JsonSerializer.Serialize(res, new JsonSerializerOptions { WriteIndented = true }));
     }
-}                                          
+};
