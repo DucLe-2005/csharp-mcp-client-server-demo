@@ -1,4 +1,4 @@
-upda# 🧩 MCP Client–Server Demo (.NET)
+🧩 MCP Client–Server Demo (.NET)
 
 This project is a **simple implementation of a Model Context Protocol (MCP)** system using **.NET**, consisting of two components:
 
